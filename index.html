@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+          </script>
+          <script type="text/javascript"
+            src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+          </script>
+          <!-- Latest compiled and minified plotly.js JavaScript -->
+            <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script> -->
+           <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.3.2/math.js"></script> -->
+    </head>
+    <body>
+        <h1>
+            Welcome to a Kalman filter simulation demo.
+        </h1>
+
+        <p>
+            Continuous time kinematic equations for height of falling object: <br>
+            Velocity: $\dot{h} = \dot{h}(t-\Delta t) - g \Delta t$ <br>
+            
+            Height (position): $ h(t)= h(t-\Delta t) + \dot{h}(t-\Delta t) - \frac{1}{2} g (\Delta t)^2$
+            <br><br>
+            Since we're running a loop, we convert the continuous equation to one described in terms of a discrete time index, $k$, where $t=k\Delta t$:
+            <br>
+            ${\dot{h}}_k = {\dot{h}}_{k-1}-g\Delta t$ <br>
+            $h_k = h_{k-1} + {\dot{h}}_{k-1} \Delta t - \frac{1}{2}g (\Delta t)^2$
+        </p>
+
+    </body>
+    <script src="home.js"></script>
+</html>
