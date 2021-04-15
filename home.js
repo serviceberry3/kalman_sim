@@ -1,9 +1,17 @@
-/*
+
+
+
+
+
+
+
 
 console.log("Welcome");
 
 //Simulate true signal and measurement
 //Define system
+
+//number of cycles to run
 N = 1000;
 
 //time step
@@ -12,28 +20,41 @@ dt = 0.001;
 //time vector
 t = []
 for (i = 0; i < N; i++) {
-    t[i] = dt* (i+1);
-}*/
+    t[i] = dt * (i + 1);
+    //console.log(t[i]);
+}
+
+
+//define matrices
+F = math.matrix([[1, dt], [0, 1]]);
+G = math.matrix([-1/2*dt^2, -dt]);
+H = math.matrix([1, 0]);
+Q = math.matrix([[0, 0], [0, 0]]);
+u = 9.80665;
+I = math.identity(2);
+console.log("Done");
+
+
+
+y0 = 100;
+v0 = 0;
+
+//take blank 2xN matrix
+xt = math.zeros(2, N);
+
+//set 0th column of xt to y0, v0
+xt = math.subset(xt, math.index(math.range(0, 2), 0), [y0, v0])
+
+console.log(math.size(xt));
+
 
 
 /*
-F = [1, dt; 0, 1];
-G = [-1/2*dt^2; -dt];
-H = [1 0];
-Q = [0, 0; 0, 0];
-u = 9.80665;
-I = eye(2);
-disp("Test");
-
-y0=100;
-v0=0;
-
-xt=zeros(2,N);
-xt(:,1)=[y0; v0];
-
-for k=2:N
+for k = 2:N
     xt(:,k)=F*xt(:,k-1)+G*u;
 end
+
+
 
 R=4;
 v=sqrt(R)*randn(1,N);
