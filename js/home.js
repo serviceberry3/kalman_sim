@@ -3,7 +3,8 @@ var estCtrXInit = canvDim / 2 + canvDim / 4;
 var actualCtrXInit = canvDim / 2 - canvDim / 4;
 var initialY = 70;
 var rangeFinderBoxWidth = 100;
-var rangeFinderBoxCtrX = 450;
+var rangeFinderBoxCtrX = actualCtrXInit;
+var rangeFinderBoxLeftX = rangeFinderBoxCtrX - rangeFinderBoxWidth / 2;
 var rangeFinderBoxTop = 575;
 var ballRad = 15;
 var zeroLineYVal = 550;
@@ -15,6 +16,72 @@ var predictedOutputs = [];
 
 //time step, delta t
 dt = 0.01;
+
+var xArray = [];
+var yArrayActual = [];
+
+//plotly actual position data
+var actualPosData = {
+    x: xArray,
+    y: yArrayActual,
+    mode: "lines",
+    type: "scatter",
+    line: {
+        color: 'rgb(55, 128, 191)',
+        width: 1
+    },
+    name: "Actual position"
+};
+
+var yArrayEstimated = [];
+
+//plotly estimated position data
+var estimatedPosData = {
+    x: xArray,
+    y: yArrayEstimated,
+    mode: "lines",
+    type: "scatter",
+    line: {
+        color: 'rgb(255, 128, 191)',
+        width: 1
+    },
+    name: "Estimated position"
+};
+
+var yArrayMeasured = [];
+var yArrayMeasuredLive = [];
+
+//plotly simulated measurement data
+var measuredPosData = {
+    x: xArray,
+    y: yArrayMeasuredLive,
+    mode: "lines",
+    type:"scatter",
+    line: {
+        color: 'rgb(23, 255, 191)',
+        width: 1
+    },
+    name: "\'Measured\' position"
+};
+
+var allData = [measuredPosData, actualPosData, estimatedPosData];
+
+//plotly graph layout
+var layout = {
+    autosize: false,
+    width: 750,
+    height: 300,
+    margin: {
+        l: 50,
+        r: 50,
+        b: 50,
+        t: 50,
+        pad: 4
+    },
+    xaxis: {range: [0, 10], title: "Time (s)"},
+    yaxis: {range: [50, 550], title: "Position (pixels)"},
+    title: "Position vs. Time Plot"
+};
 
 /**
  * The position of the object as it undergoes free fall is estimated despite uncertainty about its initial position and uncertainty
@@ -36,7 +103,7 @@ function setLineDash(list) {
 function cleanCanvas() {
     let cnv = createCanvas(canvDim, canvDim);
     background(230, 230, 230);
-    cnv.position(600, 100);
+    cnv.position(800, 100);
 }
 
 var setup = function() {
@@ -44,6 +111,10 @@ var setup = function() {
 
     //run Kalman simulation for all discrete timepoints once at beginning
     runKalmanSim();
+
+    button = createButton('Click to restart simulation');
+    button.position(800, 80);
+    button.mouseClicked(onButtonClicked);
 }
 
 var draw = function() {
@@ -55,38 +126,109 @@ var draw = function() {
     textSize(10);
     textAlign(CENTER);
     text('Newtonian motion estimated by applying Kalman filter to simulated rangefinder measurement data', 350, 10, 200, 100);
-    rect(400, rangeFinderBoxTop, 100, 100);
+    rect(rangeFinderBoxLeftX, rangeFinderBoxTop, 100, 100);
 
     time = frameCount * dt;
-    textSize(16);
-    text('Time elapsed: ' + round(time, 3) + ' s', 90, 590);
+    textSize(15);
+    text('Rangefinder', 150, 590);
+    text('Time elapsed: ' + round(time, 3) + ' s', 520, 590);
 
     //calculate y pos of actual falling ball, using kinematic equation
     yPosActual = initialY + 0 * time + 0.5 * g * time * time;
     yPosActual = constrain(yPosActual, initialY, zeroLineYVal - ballRad);
 
+    xArray.push(time);
+    yArrayActual.push(yPosActual);
+
     indexer = frameCount - 1;
     indexer = constrain(indexer, 0, predictedOutputs.length - 1);
 
-    //yPosEstimated = initialY;
     yPosEstimated = constrain(predictedOutputs[indexer], initialY, zeroLineYVal - ballRad);
 
+    yArrayEstimated.push(yPosEstimated);
+
+    yPosMeasured = constrain(yArrayMeasured[indexer], initialY, zeroLineYVal - ballRad);
+
+    yArrayMeasuredLive.push(yPosMeasured);
+
+    push();
+    fill(55, 128, 191);
     ellipse(actualCtrXInit, yPosActual, 2 * ballRad);
     push();
+    fill(255, 128, 191);
     setLineDash([4, 4]);
     ellipse(estCtrXInit, yPosEstimated, 2 * ballRad);
+    pop();
     pop();
 
     line(0, zeroLineYVal, canvDim, zeroLineYVal);
 
     stroke(255, 0, 0);
     line(rangeFinderBoxCtrX, rangeFinderBoxTop, rangeFinderBoxCtrX, yPosEstimated + ballRad);
+
+    if (yPosActual < zeroLineYVal - ballRad) {
+        Plotly.newPlot("posvtimeplot", allData, layout);
+    }
+}
+
+function resetDataArrays() {
+    xArray = [];
+    yArrayActual = [];
+
+    //plotly actual position data
+    actualPosData = {
+        x: xArray,
+        y: yArrayActual,
+        mode: "lines",
+        type: "scatter",
+        line: {
+            color: 'rgb(55, 128, 191)',
+            width: 1
+        },
+        name: "Actual position"
+    };
+
+    yArrayEstimated = [];
+
+    //plotly estimated position data
+    estimatedPosData = {
+        x: xArray,
+        y: yArrayEstimated,
+        mode: "lines",
+        type: "scatter",
+        line: {
+            color: 'rgb(255, 128, 191)',
+            width: 1
+        },
+        name: "Estimated position"
+    };
+
+    yArrayMeasuredLive = [];
+
+    //plotly simulated measurement data
+    var measuredPosData = {
+        x: xArray,
+        y: yArrayMeasuredLive,
+        mode: "lines",
+        type:"scatter",
+        line: {
+            color: 'rgb(23, 255, 191)',
+            width: 1
+        },
+        name: "\'Measured\' position"
+    };
+
+    allData = [measuredPosData, actualPosData, estimatedPosData];
+}
+
+var onButtonClicked = function() {
+    console.log("Button cicked!");
+    frameCount = 0;
+    cleanCanvas();
+    resetDataArrays();
 }
 
 var mouseClicked = function() {
-    console.log("Clicked!");
-    frameCount = 0;
-    cleanCanvas();
 }
 
 function runKalmanSim() {
@@ -244,6 +386,7 @@ function runKalmanSim() {
         //get fake measurement for this timestamp
         measuredOutput = math.subset(z, math.index(math.range(0, 1), i)); //where z is a 1xN matrix of fake measurements
         //console.log("Fake measurement is", measuredOutput);
+        yArrayMeasured.push(measuredOutput);
 
         //get the predicted state vector for this timestamp (assuming no noise in system), as predicted in for loop above
         currStateCol = math.subset(x, math.index(math.range(0, 2), i));
@@ -267,5 +410,3 @@ function runKalmanSim() {
         P = math.multiply(math.subtract(I, math.multiply(K, H)), P);
     }
 }
-
-
