@@ -1,30 +1,49 @@
 <html>
     <head>
+        <!--
         <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+        -->
         <script type="text/x-mathjax-config">
             MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
         </script>
         <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
         </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.3.2/math.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
     </head>
     <body>
         <h1>
-            Welcome to a Kalman filter simulation demo.
+            Linear discrete-time Kalman filter simulation demo: object in free fall, no air resistance.
         </h1>
 
         <p>
             Continuous time kinematic equations for height of falling object: <br>
-            Velocity: $\dot{h} = \dot{h}(t-\Delta t) - g \Delta t$ <br>
+            <b>Velocity:</b> $\dot{h} = \dot{h}(t-\Delta t) - g \Delta t$, seen more frequently as <br>
+            the kinematic equation $v = v_{0} + at$ <br>
             
-            Height (position): $ h(t)= h(t-\Delta t) + \dot{h}(t-\Delta t) - \frac{1}{2} g (\Delta t)^2$
+            <b>Height (position):</b> $ h(t)= h(t-\Delta t) + \dot{h}(t-\Delta t)\Delta t - \frac{1}{2} g (\Delta t)^2$, seen<br>
+            more frequently as the kinematic equation $x = x_{0} + v_{0}t + \frac{1}{2}at^2$
             <br><br>
-            Since we're running a loop, we convert the continuous equation to one described in terms of a discrete time index, $k$, where $t=k\Delta t$:
+            Since we're running a predictor-corrector loop, we convert the continuous<br> equations to ones
+            described in terms of a discrete time index,<br> $k$, where $t=k\Delta t$:
             <br>
             ${\dot{h}}_k = {\dot{h}}_{k-1}-g\Delta t$ <br>
-            $h_k = h_{k-1} + {\dot{h}}_{k-1} \Delta t - \frac{1}{2}g (\Delta t)^2$
+            $h_k = h_{k-1} + {\dot{h}}_{k-1} \Delta t - \frac{1}{2}g (\Delta t)^2$<br>
+
+            We're estimating the position, so position must be used as a state.<br>
+            Since velocity appears in the position equation, we also include it as a state.<br><br>
+            In this example, the input vector $u$ is defined to be $g$, the graviational constant.<br>
+            $F$ (the state system matrix), $G$ (the input system matrix), and $u$ are all constant.<br>
+            
+            There is no process noise uncertainty term, $w$, since we assume<br>
+            the Newtonian kinematic equations have little to no inherent error. Thus the process<br>
+            noise covariance matrix, $Q$, can be set to zero for this problem.<br><br>
+
+            Since we pretend the initial position of the object was guessed/determined roughly,<br>
+            but the initial velocity is pretty much known to be 0, we use an error of $10 m^2$ for<br>
+            the initial position and $0.01 \frac{m^2}{s^2}$ for the intial velocity.
         </p>
 
     </body>
-    <script src="home.js"></script>
+    <script src="js/home.js"></script>
 </html>
